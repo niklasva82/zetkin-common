@@ -23,6 +23,7 @@ export default class CampaignForm extends React.Component {
         actionList: PropTypes.complexList.isRequired,
         userActionList: PropTypes.complexList.isRequired,
         responseList: PropTypes.complexList.isRequired,
+        activityList: PropTypes.complexList.isRequired,
         onResponse: PropTypes.func,
         orgList: PropTypes.map.isRequired,
         scrollContainer: PropTypes.any,
@@ -77,11 +78,12 @@ export default class CampaignForm extends React.Component {
     }
 
     render() {
-        const { actionList, orgList, responseList, userActionList } = this.props
+        const { actionList, activityList, orgList, responseList, userActionList } = this.props
 
         let isPending = actionList.get('isPending')
             || userActionList.get('isPending')
-            || responseList.get('isPending');
+            || responseList.get('isPending')
+            || activityList.get('isPending');
 
         if (isPending) {
             return <LoadingIndicator/>
@@ -412,6 +414,8 @@ export default class CampaignForm extends React.Component {
                 );
             }
 
+            const activityArray = activityList.get('items');
+
             return (
                 <div ref="CampaignForm" className={ classes }>
                     { message }
@@ -435,6 +439,15 @@ export default class CampaignForm extends React.Component {
                         />*/}
                     <form method="post" action="/forms/actionResponse"
                         className="CampaignForm-form">
+                        <select onChange={ this.onSelectActivityFilter.bind(this) } >
+                            { activityArray.map((activity) => 
+                                <option 
+                                    key={ activity.id } 
+                                    value={ activity.id }>
+                                        { activity.title }
+                                    </option>)
+                            }
+                        </select>
                         <ul className="CampaignForm-days">
                             { dayComponents }
                         </ul>
@@ -448,6 +461,11 @@ export default class CampaignForm extends React.Component {
         else {
             return null;
         }
+    }
+
+    onSelectActivityFilter(event) {
+        this.setState({ activityFilter: event.target.value });
+        console.log(this.state);
     }
 
     onCalendarSelectDay(fragment) {
